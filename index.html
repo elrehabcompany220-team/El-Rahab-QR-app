@@ -240,7 +240,7 @@
     background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:0;overflow:hidden;box-shadow:var(--shadow);position:relative;
   }
   .tag-label .top-strip{height:6px;background:linear-gradient(90deg,var(--navy),var(--red),var(--gold));}
-  .tag-label .photo{width:100%;aspect-ratio:16/10;object-fit:cover;background:var(--surface-2);display:block;}
+  .tag-label .photo{width:100%;max-height:420px;object-fit:contain;background:var(--surface-2);display:block;}
   .tag-label .body{padding:20px;}
   .tag-label h2{margin:0 0 4px;font-size:19px;font-weight:900;}
   .tag-label .cat{font-size:11.5px;color:var(--gold);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
@@ -450,6 +450,10 @@ const T = {
     storage_perm_note:"بيانات المنتجات (المخزون) بتتحفظ تلقائيًا جوه متصفحك على الجهاز ده، من غير أي إذن إضافي أو إنترنت. لو فتحت الأداة من جهاز تاني هتلاقي بيانات جديدة فاضية لحد ما تضيف منتجات من عليه.",
     cam_start:"تشغيل الكاميرا", cam_stop:"إيقاف الكاميرا",
     cam_denied:"تعذّر الوصول للكاميرا. جرّب رفع صورة أو أدخل الكود يدويًا.",
+    cam_ios_pwa_issue:"مشكلة معروفة في آيفون: الكاميرا بتتعطّل أحيانًا لما الأداة تكون مثبّتة كتطبيق مستقل. جرّب تفتح نفس الرابط من متصفح سفاري عادي (مش من الأيقونة المثبتة)، أو استخدم رفع صورة / الكود اليدوي.",
+    cam_permission_blocked:"صلاحية الكاميرا متمنوعة لهذا الموقع في إعدادات متصفحك. روح لإعدادات الموقع (أيقونة القفل 🔒 جنب الرابط) وفعّل صلاحية الكاميرا يدويًا، وجرب تاني.",
+    cam_not_found:"مفيش كاميرا متاحة على الجهاز ده. جرّب رفع صورة أو أدخل الكود يدويًا.",
+    cam_in_use:"الكاميرا مستخدمة في تطبيق أو تاب تاني دلوقتي. اقفل أي تطبيق تاني بيستخدمها وجرب تاني.",
     upload_qr:"ارفع صورة تحتوي على QR كود",
     manual_ph:"الصق كود المنتج هنا",
     manual_btn:"بحث",
@@ -530,6 +534,10 @@ const T = {
     storage_perm_note:"Product (inventory) data is saved automatically inside your browser on this device — no extra permission or internet needed. Opening the tool on a different device starts with an empty catalog until you add products there.",
     cam_start:"Start Camera", cam_stop:"Stop Camera",
     cam_denied:"Couldn't access the camera. Try uploading an image or entering the code manually.",
+    cam_ios_pwa_issue:"Known iPhone issue: the camera can stop working when the tool is installed as a standalone app. Try opening the same link in a regular Safari tab (not the installed icon), or use image upload / manual code instead.",
+    cam_permission_blocked:"Camera access is blocked for this site in your browser settings. Open the site settings (the lock icon 🔒 next to the address bar), enable camera access, then try again.",
+    cam_not_found:"No camera was found on this device. Try uploading an image or entering the code manually.",
+    cam_in_use:"The camera is currently in use by another app or tab. Close whatever else is using it and try again.",
     upload_qr:"Upload an image containing a QR code",
     manual_ph:"Paste the product code here",
     manual_btn:"Search",
@@ -1016,6 +1024,25 @@ function setScanMsg(html){
   if(m) m.innerHTML = html;
 }
 
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function camErrorMessage(e){
+  const name = e && e.name;
+  if(isIOS() && isStandaloneMode()){
+    return t('cam_ios_pwa_issue');
+  }
+  if(name === 'NotAllowedError' || name === 'PermissionDeniedError'){
+    return t('cam_permission_blocked');
+  }
+  if(name === 'NotFoundError' || name === 'DevicesNotFoundError'){
+    return t('cam_not_found');
+  }
+  if(name === 'NotReadableError' || name === 'TrackStartError'){
+    return t('cam_in_use');
+  }
+  return t('cam_denied');
+}
 async function toggleCamera(){
   if(state.camStream){ stopCamera(); renderScanArea(); return; }
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
@@ -1037,7 +1064,8 @@ async function toggleCamera(){
     if(btn) btn.innerHTML = ICONS.camera + t('cam_stop');
     scanLoop();
   }catch(e){
-    setScanMsg(`<div class="err-box">${esc(t('cam_denied'))}</div>`);
+    console.error('camera error', e);
+    setScanMsg(`<div class="err-box">${esc(camErrorMessage(e))}</div>`);
   }
 }
 function stopCamera(){
