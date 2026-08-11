@@ -454,6 +454,7 @@ const T = {
     cam_permission_blocked:"صلاحية الكاميرا متمنوعة لهذا الموقع في إعدادات متصفحك. روح لإعدادات الموقع (أيقونة القفل 🔒 جنب الرابط) وفعّل صلاحية الكاميرا يدويًا، وجرب تاني.",
     cam_not_found:"مفيش كاميرا متاحة على الجهاز ده. جرّب رفع صورة أو أدخل الكود يدويًا.",
     cam_in_use:"الكاميرا مستخدمة في تطبيق أو تاب تاني دلوقتي. اقفل أي تطبيق تاني بيستخدمها وجرب تاني.",
+    qr_lib_failed:"تعذّر تحميل مكتبة قراءة الـQR (يحتاج إنترنت وقت أول فتح للأداة). تأكد من اتصال الإنترنت واعمل تحديث للصفحة (Refresh) وجرب تاني.",
     upload_qr:"ارفع صورة تحتوي على QR كود",
     manual_ph:"الصق كود المنتج هنا",
     manual_btn:"بحث",
@@ -538,6 +539,7 @@ const T = {
     cam_permission_blocked:"Camera access is blocked for this site in your browser settings. Open the site settings (the lock icon 🔒 next to the address bar), enable camera access, then try again.",
     cam_not_found:"No camera was found on this device. Try uploading an image or entering the code manually.",
     cam_in_use:"The camera is currently in use by another app or tab. Close whatever else is using it and try again.",
+    qr_lib_failed:"Couldn't load the QR-reading library (needs internet the first time the tool opens). Check your connection, refresh the page, and try again.",
     upload_qr:"Upload an image containing a QR code",
     manual_ph:"Paste the product code here",
     manual_btn:"Search",
@@ -1049,6 +1051,10 @@ async function toggleCamera(){
     setScanMsg(`<div class="err-box">${esc(t('cam_denied'))}</div>`);
     return;
   }
+  if(typeof jsQR !== 'function'){
+    setScanMsg(`<div class="err-box">${esc(t('qr_lib_failed'))}</div>`);
+    return;
+  }
   try{
     let stream;
     try{
@@ -1079,17 +1085,26 @@ function scanLoop(){
   const video = document.getElementById('camVideo');
   const canvas = document.getElementById('camCanvas');
   if(!video || !canvas){ return; }
-  if(video.readyState === video.HAVE_ENOUGH_DATA){
-    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video,0,0,canvas.width,canvas.height);
-    const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
-    const code = jsQR(imgData.data, imgData.width, imgData.height);
-    if(code && code.data){
-      stopCamera();
-      resolveScannedCode(code.data);
+  try{
+    if(typeof jsQR !== 'function'){
+      setScanMsg(`<div class="err-box">${esc(t('qr_lib_failed'))}</div>`);
       return;
     }
+    if(video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0){
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d', { willReadFrequently:true });
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+      const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts:'attemptBoth' });
+      if(code && code.data){
+        stopCamera();
+        resolveScannedCode(code.data);
+        return;
+      }
+    }
+  }catch(err){
+    console.error('scan frame error', err);
+    /* don't let one bad frame kill the whole scanning loop — keep trying */
   }
   state.camLoop = requestAnimationFrame(scanLoop);
 }
