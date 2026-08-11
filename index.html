@@ -625,6 +625,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   .cam-wrap{position:relative;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:1/1;max-width:340px;margin:0 auto;}
   .cam-wrap video{width:100%;height:100%;object-fit:cover;}
   .cam-frame{position:absolute;inset:14%;border:3px solid var(--gold);border-radius:20px;box-shadow:0 0 0 999px rgba(0,0,0,.35);}
+  .torch-btn{
+    position:absolute;bottom:14px;inset-inline-end:14px;width:42px;height:42px;border-radius:50%;
+    background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.5);color:#fff;
+    display:none;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);z-index:2;
+  }
+  .torch-btn svg{width:19px;height:19px;}
+  .torch-btn.on{background:var(--gold);border-color:var(--gold);color:#13213D;}
   .cam-hint{text-align:center;font-size:11.5px;color:var(--text-muted);margin-top:12px;}
   .perm-note{
     display:flex;align-items:flex-start;gap:9px;background:var(--surface-2);border:1px solid var(--border);
@@ -854,6 +861,7 @@ const T = {
     cam_not_found:"مفيش كاميرا متاحة على الجهاز ده. جرّب رفع صورة أو أدخل الكود يدويًا.",
     cam_in_use:"الكاميرا مستخدمة في تطبيق أو تاب تاني دلوقتي. اقفل أي تطبيق تاني بيستخدمها وجرب تاني.",
     qr_lib_failed:"تعذّر تحميل مكتبة قراءة الـQR (يحتاج إنترنت وقت أول فتح للأداة). تأكد من اتصال الإنترنت واعمل تحديث للصفحة (Refresh) وجرب تاني.",
+    torch_unsupported:"الكشاف مش متاح على الجهاز أو المتصفح ده",
     upload_qr:"ارفع صورة تحتوي على QR كود",
     manual_ph:"الصق كود المنتج هنا",
     manual_btn:"بحث",
@@ -939,6 +947,7 @@ const T = {
     cam_not_found:"No camera was found on this device. Try uploading an image or entering the code manually.",
     cam_in_use:"The camera is currently in use by another app or tab. Close whatever else is using it and try again.",
     qr_lib_failed:"Couldn't load the QR-reading library (needs internet the first time the tool opens). Check your connection, refresh the page, and try again.",
+    torch_unsupported:"Flashlight isn't available on this device or browser",
     upload_qr:"Upload an image containing a QR code",
     manual_ph:"Paste the product code here",
     manual_btn:"Search",
@@ -1006,6 +1015,7 @@ const ICONS = {
   lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
   shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
   cloud:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>',
+  flash:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>',
 };
 
 /* ---------------- state ---------------- */
@@ -1157,8 +1167,10 @@ function goto(screen){
   state.screen = screen;
   if(screen==='add'){ draftColors=[]; draftSizes=[]; draftImage=null; }
   if(screen==='catalog'){ state.productsLoadError=false; loadAllProducts().then(render); }
+  if(screen==='inquiry'){ state.scanTab='camera'; }
   render();
   window.scrollTo(0,0);
+  if(screen==='inquiry'){ startCamera(); }
 }
 function goHome(){ goto('home'); }
 
@@ -1388,6 +1400,7 @@ function setScanTab(tab){
   state.scanTab = tab;
   render();
   renderScanArea();
+  if(tab==='camera'){ startCamera(); }
 }
 function renderScanArea(){
   const area = document.getElementById('scanArea');
@@ -1397,10 +1410,11 @@ function renderScanArea(){
       <div class="cam-wrap" id="camWrap">
         <video id="camVideo" playsinline muted></video>
         <div class="cam-frame"></div>
+        <button class="torch-btn" id="torchBtn" style="display:none;" onclick="toggleTorch()">${ICONS.flash}</button>
       </div>
       <p class="cam-hint">${esc(t('cam_hint'))}</p>
       ${!state.camStream ? `<div class="perm-note">${ICONS.lock}<span>${esc(t('cam_perm_note'))}</span></div>` : ''}
-      <div style="margin-top:14px;"><button class="btn-secondary" id="camToggleBtn" onclick="toggleCamera()">${ICONS.camera}${esc(t('cam_start'))}</button></div>
+      <div style="margin-top:14px;"><button class="btn-secondary" id="camToggleBtn" onclick="toggleCamera()">${ICONS.camera}${esc(state.camStream ? t('cam_stop') : t('cam_start'))}</button></div>
       <canvas id="camCanvas" style="display:none;"></canvas>
     `;
   }else if(state.scanTab==='image'){
@@ -1414,7 +1428,7 @@ function renderScanArea(){
   }else{
     area.innerHTML = `
       <div class="manual-row">
-        <input type="text" id="manualCode" placeholder="${esc(t('manual_ph'))}"/>
+        <input type="text" id="manualCode" placeholder="${esc(t('manual_ph'))}" onkeydown="if(event.key==='Enter')submitManualCode()"/>
       </div>
       <button class="btn-primary" style="margin-top:12px;" onclick="submitManualCode()">${ICONS.search}${esc(t('manual_btn'))}</button>
     `;
@@ -1444,8 +1458,9 @@ function camErrorMessage(e){
   }
   return t('cam_denied');
 }
-async function toggleCamera(){
-  if(state.camStream){ stopCamera(); renderScanArea(); return; }
+let torchOn = false;
+async function startCamera(){
+  if(state.camStream) return;
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
     setScanMsg(`<div class="err-box">${esc(t('cam_denied'))}</div>`);
     return;
@@ -1454,6 +1469,7 @@ async function toggleCamera(){
     setScanMsg(`<div class="err-box">${esc(t('qr_lib_failed'))}</div>`);
     return;
   }
+  torchOn = false;
   try{
     let stream;
     try{
@@ -1463,15 +1479,49 @@ async function toggleCamera(){
     }
     state.camStream = stream;
     const video = document.getElementById('camVideo');
+    if(!video){ stream.getTracks().forEach(tr=>tr.stop()); state.camStream=null; return; }
     video.srcObject = stream;
     await video.play();
     const btn = document.getElementById('camToggleBtn');
     if(btn) btn.innerHTML = ICONS.camera + t('cam_stop');
+    const noteBox = document.querySelector('.perm-note');
+    if(noteBox) noteBox.remove();
+    updateTorchButton();
     scanLoop();
   }catch(e){
     console.error('camera error', e);
     setScanMsg(`<div class="err-box">${esc(camErrorMessage(e))}</div>`);
   }
+}
+function updateTorchButton(){
+  const btn = document.getElementById('torchBtn');
+  if(!btn || !state.camStream) return;
+  const track = state.camStream.getVideoTracks()[0];
+  const caps = track && track.getCapabilities ? track.getCapabilities() : {};
+  if(caps && caps.torch){
+    btn.style.display = 'flex';
+    btn.classList.toggle('on', torchOn);
+  }else{
+    btn.style.display = 'none';
+  }
+}
+async function toggleTorch(){
+  if(!state.camStream) return;
+  const track = state.camStream.getVideoTracks()[0];
+  if(!track) return;
+  torchOn = !torchOn;
+  try{
+    await track.applyConstraints({ advanced:[{ torch: torchOn }] });
+    updateTorchButton();
+  }catch(e){
+    console.error('torch failed', e);
+    torchOn = false;
+    showToast(t('torch_unsupported'));
+  }
+}
+function toggleCamera(){
+  if(state.camStream){ stopCamera(); renderScanArea(); return; }
+  startCamera();
 }
 function stopCamera(){
   if(state.camLoop){ cancelAnimationFrame(state.camLoop); state.camLoop=null; }
@@ -1479,6 +1529,7 @@ function stopCamera(){
     state.camStream.getTracks().forEach(tr=>tr.stop());
     state.camStream = null;
   }
+  torchOn = false;
 }
 function scanLoop(){
   const video = document.getElementById('camVideo');
@@ -1537,10 +1588,14 @@ function submitManualCode(){
 }
 async function resolveScannedCode(raw){
   setScanMsg(`<p class="cam-hint">...</p>`);
-  let id = raw;
-  const m = raw.match(/RAHAB-PROD::(.+)/);
-  if(m) id = m[1];
-  const product = await getProduct(id.trim());
+  let id = (raw||'').trim();
+  const m = id.match(/RAHAB-PROD::\s*([^\s]+)/);
+  if(m){
+    id = m[1];
+  }else{
+    id = id.replace(/\s+/g,'');
+  }
+  const product = await getProduct(id);
   if(product){
     state.current = product;
     state.fromInquiry = true;
@@ -1580,7 +1635,11 @@ function renderProdList(items){
 }
 function filterCatalog(){
   const q = document.getElementById('catSearch').value.trim().toLowerCase();
-  const filtered = !q ? state.products : state.products.filter(p=> (p.name||'').toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q));
+  const filtered = !q ? state.products : state.products.filter(p=>
+    (p.name||'').toLowerCase().includes(q) ||
+    (p.category||'').toLowerCase().includes(q) ||
+    (p.id||'').toLowerCase().includes(q)
+  );
   const list = document.getElementById('prodList');
   list.innerHTML = filtered.length ? renderProdList(filtered) : `<div class="empty-state">${ICONS.search}<p>${esc(t('empty_search'))}</p></div>`;
 }
