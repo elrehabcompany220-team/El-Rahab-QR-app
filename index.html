@@ -513,34 +513,27 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   .hero p{margin:0;color:var(--text-muted);font-size:13.5px;line-height:1.7;max-width:46ch;}
 
   /* ---------- Tag cards (signature element) ---------- */
-  .tag-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px;}
+  .tag-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px;}
+  @media(max-width:680px){.tag-grid{grid-template-columns:1fr 1fr;}}
   @media(max-width:520px){.tag-grid{grid-template-columns:1fr;}}
   .tag-card{
     position:relative;background:var(--surface);border:1px solid var(--border);
-    border-radius:20px;padding:26px 20px 22px;cursor:pointer;overflow:hidden;
+    border-radius:20px;padding:0 0 20px;cursor:pointer;overflow:hidden;
     transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
     box-shadow:var(--shadow);
   }
   .tag-card:hover{transform:translateY(-3px);border-color:var(--red);}
   .tag-card::before{
-    content:"";position:absolute;top:0;left:0;right:0;height:5px;
+    content:"";position:absolute;top:0;left:0;right:0;height:5px;z-index:2;
     background:linear-gradient(90deg,var(--red),var(--gold));
   }
-  .tag-card .hole{
-    position:absolute;top:-10px;right:22px;width:20px;height:20px;border-radius:50%;
-    background:var(--bg);border:1px solid var(--border);
-  }
-  [dir="ltr"] .tag-card .hole{right:auto;left:22px;}
-  .tag-card .ic{
-    width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;
-    background:var(--surface-2);color:var(--navy);margin-bottom:16px;
-  }
-  .theme-dark .tag-card .ic{color:var(--gold);}
-  .tag-card .ic svg{width:24px;height:24px;}
+  .tag-card .cover{width:100%;height:92px;display:block;background:var(--surface-2);}
+  .tag-card .cover svg{width:100%;height:100%;display:block;}
+  .tag-card .body{position:relative;padding:16px 18px 46px;}
   .tag-card h3{margin:0 0 6px;font-size:16.5px;font-weight:800;}
   .tag-card p{margin:0;font-size:12.5px;color:var(--text-muted);line-height:1.6;}
   .tag-card .go{
-    position:absolute;bottom:20px;inset-inline-end:20px;width:30px;height:30px;border-radius:50%;
+    position:absolute;bottom:12px;inset-inline-end:18px;width:30px;height:30px;border-radius:50%;
     background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;
   }
   .tag-card .go svg{width:14px;height:14px;transform:scaleX(var(--flip,1));}
@@ -608,11 +601,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 10px 24px -10px color-mix(in srgb, var(--red) 70%, transparent);
   }
   .btn-primary:hover{background:var(--red-dark);}
-  .btn-primary svg{width:16px;height:16px;}
+  .btn-primary svg{width:16px;height:16px;flex-shrink:0;}
   .btn-secondary{
     width:100%;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:13px;padding:14px;
     font-family:var(--font-body);font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
   }
+  .btn-secondary svg{width:15px;height:15px;flex-shrink:0;}
+  .btn-secondary.btn-compact{padding:11px;font-size:12.5px;}
+  .btn-secondary.btn-compact svg{width:13px;height:13px;}
   .btn-secondary:hover{border-color:var(--navy);}
   .btn-danger{color:var(--red);}
   .err-box{background:color-mix(in srgb, var(--red) 10%, transparent);color:var(--red);border:1px solid color-mix(in srgb, var(--red) 30%, transparent);
@@ -831,6 +827,12 @@ const T = {
     add_desc:"سجّل تفاصيل المنتج وهات له QR كود خاص بيه",
     inquiry_title:"استعلام عن منتج",
     inquiry_desc:"اسكان أي QR كود واعرض تفاصيل المنتج فورًا",
+    update_title:"تحديث بيانات منتج",
+    update_desc:"عدّل بيانات منتج موجود وحدّث الـQR بتاعه",
+    update_pick_desc:"اختار المنتج اللي عايز تعدّل بياناته",
+    save_changes_btn:"حفظ التعديلات",
+    update_saved_toast:"تم تحديث بيانات المنتج بنجاح",
+    or_search_label:"أو دوّر بالاسم / الصنف / الكود",
     all_products:"كل المنتجات",
     settings:"الإعدادات",
     back:"رجوع",
@@ -917,6 +919,12 @@ const T = {
     add_desc:"Save product specs and generate its own QR tag",
     inquiry_title:"Product Inquiry",
     inquiry_desc:"Scan any QR tag to view product details instantly",
+    update_title:"Update Product",
+    update_desc:"Edit an existing product's details and refresh its QR",
+    update_pick_desc:"Choose the product you want to edit",
+    save_changes_btn:"Save Changes",
+    update_saved_toast:"Product updated successfully",
+    or_search_label:"Or search by name / category / code",
     all_products:"All Products",
     settings:"Settings",
     back:"Back",
@@ -1016,6 +1024,10 @@ const ICONS = {
   shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
   cloud:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>',
   flash:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>',
+  coverAdd:'<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="100" fill="#EFEAE1"/><path d="M55 47 L100 33 L145 47 L145 80 L100 94 L55 80 Z" fill="#1F3157"/><path d="M55 47 L100 61 L145 47 L100 33 Z" fill="#2A3E68"/><path d="M100 61 L100 94" stroke="#132038" stroke-width="2"/><circle cx="100" cy="30" r="21" fill="#DE1B2B"/><rect x="93" y="19" width="14" height="22" rx="3" fill="#fff"/><rect x="89" y="23" width="22" height="14" rx="3" fill="#fff"/><rect x="150" y="58" width="26" height="26" rx="4" fill="#fff" stroke="#B9843E" stroke-width="2"/><rect x="156" y="64" width="5" height="5" fill="#13213D"/><rect x="165" y="64" width="5" height="5" fill="#13213D"/><rect x="156" y="73" width="5" height="5" fill="#13213D"/><rect x="165" y="73" width="5" height="5" fill="#B9843E"/></svg>',
+  coverScan:'<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="100" fill="#EFEAE1"/><rect x="68" y="12" width="58" height="80" rx="10" fill="#13213D"/><rect x="75" y="21" width="44" height="54" rx="3" fill="#fff"/><rect x="81" y="27" width="8" height="8" fill="#13213D"/><rect x="93" y="27" width="8" height="8" fill="#13213D"/><rect x="105" y="27" width="8" height="8" fill="#13213D"/><rect x="81" y="39" width="8" height="8" fill="#13213D"/><rect x="105" y="39" width="8" height="8" fill="#DE1B2B"/><rect x="81" y="51" width="8" height="8" fill="#13213D"/><rect x="93" y="51" width="8" height="8" fill="#13213D"/><rect x="105" y="51" width="8" height="8" fill="#13213D"/><circle cx="97" cy="80" r="3" fill="#fff"/><circle cx="146" cy="62" r="19" fill="none" stroke="#B9843E" stroke-width="6"/><line x1="159" y1="76" x2="175" y2="91" stroke="#B9843E" stroke-width="7" stroke-linecap="round"/></svg>',
+  coverEdit:'<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="100" fill="#EFEAE1"/><rect x="58" y="20" width="72" height="70" rx="6" fill="#fff" stroke="#13213D" stroke-width="3"/><rect x="79" y="13" width="30" height="13" rx="4" fill="#13213D"/><line x1="70" y1="41" x2="118" y2="41" stroke="#CDD3DD" stroke-width="4" stroke-linecap="round"/><line x1="70" y1="53" x2="118" y2="53" stroke="#CDD3DD" stroke-width="4" stroke-linecap="round"/><line x1="70" y1="65" x2="98" y2="65" stroke="#CDD3DD" stroke-width="4" stroke-linecap="round"/><path d="M118 72 L153 37 L166 50 L131 85 Z" fill="#B9843E"/><path d="M153 37 L161 29 L174 42 L166 50 Z" fill="#DE1B2B"/><path d="M118 72 L131 85 L116 90 Z" fill="#13213D"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
 };
 
 /* ---------------- state ---------------- */
@@ -1166,11 +1178,14 @@ function goto(screen){
   stopCamera();
   state.screen = screen;
   if(screen==='add'){ draftColors=[]; draftSizes=[]; draftImage=null; }
-  if(screen==='catalog'){ state.productsLoadError=false; loadAllProducts().then(render); }
-  if(screen==='inquiry'){ state.scanTab='camera'; }
+  if(screen==='catalog' || screen==='update'){ state.productsLoadError=false; loadAllProducts().then(render); }
+  if(screen==='inquiry' || screen==='update'){ state.scanTab='camera'; }
   render();
   window.scrollTo(0,0);
-  if(screen==='inquiry'){ startCamera(); }
+  if(screen==='inquiry' || screen==='update'){ startCamera(); }
+}
+function gotoAllProducts(){
+  goto('catalog');
 }
 function goHome(){ goto('home'); }
 
@@ -1193,7 +1208,7 @@ function topBar(showBack){
       </div>`}
     ${showBack ? '' : `
     <div class="topbar-actions">
-      <div class="icon-btn" onclick="goto('catalog')" title="${esc(t('all_products'))}">${ICONS.grid}</div>
+      <div class="icon-btn" onclick="gotoAllProducts()" title="${esc(t('all_products'))}">${ICONS.grid}</div>
       <div class="icon-btn" onclick="goto('settings')" title="${esc(t('settings'))}">${ICONS.gear}</div>
     </div>`}
   </div>`;
@@ -1213,8 +1228,10 @@ function screenHTML(){
     case 'add': return addScreen();
     case 'inquiry': return inquiryScreen();
     case 'catalog': return catalogScreen();
+    case 'update': return updatePickerScreen();
     case 'settings': return settingsScreen();
     case 'detail': return detailScreen();
+    case 'edit': return editScreen();
     default: return homeScreen();
   }
 }
@@ -1230,22 +1247,32 @@ function homeScreen(){
   </div>
   <div class="tag-grid">
     <div class="tag-card" onclick="goto('add')">
-      <div class="hole"></div>
-      <div class="ic">${ICONS.plus}</div>
-      <h3>${esc(t('add_title'))}</h3>
-      <p>${esc(t('add_desc'))}</p>
-      <div class="go">${ICONS.arrow}</div>
+      <div class="cover">${ICONS.coverAdd}</div>
+      <div class="body">
+        <h3>${esc(t('add_title'))}</h3>
+        <p>${esc(t('add_desc'))}</p>
+        <div class="go">${ICONS.arrow}</div>
+      </div>
     </div>
     <div class="tag-card" onclick="goto('inquiry')">
-      <div class="hole"></div>
-      <div class="ic">${ICONS.scan}</div>
-      <h3>${esc(t('inquiry_title'))}</h3>
-      <p>${esc(t('inquiry_desc'))}</p>
-      <div class="go">${ICONS.arrow}</div>
+      <div class="cover">${ICONS.coverScan}</div>
+      <div class="body">
+        <h3>${esc(t('inquiry_title'))}</h3>
+        <p>${esc(t('inquiry_desc'))}</p>
+        <div class="go">${ICONS.arrow}</div>
+      </div>
+    </div>
+    <div class="tag-card" onclick="gotoUpdatePicker()">
+      <div class="cover">${ICONS.coverEdit}</div>
+      <div class="body">
+        <h3>${esc(t('update_title'))}</h3>
+        <p>${esc(t('update_desc'))}</p>
+        <div class="go">${ICONS.arrow}</div>
+      </div>
     </div>
   </div>
   <div class="quick-row">
-    <div class="quick-chip" onclick="goto('catalog')">${ICONS.box}<span>${esc(t('all_products'))}</span></div>
+    <div class="quick-chip" onclick="gotoAllProducts()">${ICONS.box}<span>${esc(t('all_products'))}</span></div>
     <div class="quick-chip" onclick="goto('settings')">${ICONS.gear}<span>${esc(t('settings'))}</span></div>
   </div>
   `;
@@ -1317,6 +1344,73 @@ function addScreen(){
   `;
 }
 
+function editScreen(){
+  const p = state.current;
+  if(!p) return homeScreen();
+  return `
+  ${screenHead('update_title','add_head_span',"goto('detail')")}
+  <div class="card">
+    <div id="addErr"></div>
+    <div class="field">
+      <label>${esc(t('f_name'))}</label>
+      <input type="text" id="f_name" placeholder="${esc(t('f_name_ph'))}" value="${esc(p.name)}"/>
+    </div>
+    <div class="field">
+      <label>${esc(t('f_cat'))}</label>
+      <input type="text" id="f_cat" placeholder="${esc(t('f_cat_ph'))}" value="${esc(p.category||'')}"/>
+    </div>
+    <div class="field">
+      <label>${esc(t('f_colors'))}</label>
+      <div class="chip-input">
+        <input type="text" id="f_color_in" placeholder="${esc(t('f_colors_ph'))}"/>
+        <button type="button" onclick="addChip('color')">${esc(t('add_chip'))}</button>
+      </div>
+      <div class="chips" id="colorsChips"></div>
+    </div>
+    <div class="field">
+      <label>${esc(t('f_sizes'))}</label>
+      <div class="chip-input">
+        <input type="text" id="f_size_in" placeholder="${esc(t('f_sizes_ph'))}"/>
+        <button type="button" onclick="addChip('size')">${esc(t('add_chip'))}</button>
+      </div>
+      <div class="chips" id="sizesChips"></div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>${esc(t('f_origin'))}</label>
+        <input type="text" id="f_origin" placeholder="${esc(t('f_origin_ph'))}" value="${esc(p.origin||'')}"/>
+      </div>
+      <div class="field">
+        <label>${esc(t('f_price'))}</label>
+        <input type="number" id="f_price" placeholder="${esc(t('f_price_ph'))}" step="0.01" min="0" value="${esc(p.price||'')}"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>${esc(t('f_currency'))}</label>
+      <select id="f_currency">
+        <option value="EGP" ${p.currency==='EGP'?'selected':''}>EGP — جنيه مصري</option>
+        <option value="USD" ${p.currency==='USD'?'selected':''}>USD — دولار</option>
+        <option value="SAR" ${p.currency==='SAR'?'selected':''}>SAR — ريال سعودي</option>
+        <option value="AED" ${p.currency==='AED'?'selected':''}>AED — درهم إماراتي</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>${esc(t('f_notes'))}</label>
+      <textarea id="f_notes" rows="2" placeholder="${esc(t('f_notes_ph'))}">${esc(p.notes||'')}</textarea>
+    </div>
+    <div class="field">
+      <label>${esc(t('f_image'))}</label>
+      <div class="img-drop" id="imgDrop">
+        ${draftImage ? `<img src="${draftImage}"/>` : ICONS.upload}
+        ${draftImage ? '' : `<span>${esc(t('f_image_drop'))}</span>`}
+        <input type="file" accept="image/*" id="f_image" onchange="handleImageInput(event)"/>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="submitProductEdit()">${ICONS.edit}${esc(t('save_changes_btn'))}</button>
+  </div>
+  `;
+}
+
 function updateChipsUI(){
   document.getElementById('colorsChips').innerHTML = draftColors.map((c,i)=>
     `<div class="chip">${esc(c)}<button onclick="removeChip('color',${i})">&times;</button></div>`).join('');
@@ -1375,6 +1469,44 @@ async function submitProduct(){
     state.current = product;
     state.fromInquiry = false;
     showToast(t('saved_toast'));
+    goto('detail');
+  }else{
+    btn.disabled=false; btn.style.opacity=1;
+    errBox.innerHTML = `<div class="err-box">Error saving. Try again.</div>`;
+  }
+}
+async function submitProductEdit(){
+  const existing = state.current;
+  if(!existing) return;
+  const name = document.getElementById('f_name').value.trim();
+  const errBox = document.getElementById('addErr');
+  if(!name){
+    errBox.innerHTML = `<div class="err-box">${esc(t('err_name'))}</div>`;
+    return;
+  }
+  errBox.innerHTML = '';
+  const updated = {
+    id: existing.id,
+    name,
+    category: document.getElementById('f_cat').value.trim(),
+    colors: draftColors.slice(),
+    sizes: draftSizes.slice(),
+    origin: document.getElementById('f_origin').value.trim(),
+    price: document.getElementById('f_price').value.trim(),
+    currency: document.getElementById('f_currency').value,
+    notes: document.getElementById('f_notes').value.trim(),
+    image: draftImage,
+    createdAt: existing.createdAt || Date.now(),
+  };
+  const btn = document.querySelector('.btn-primary');
+  btn.disabled = true; btn.style.opacity=.6;
+  const ok = await saveProduct(updated);
+  if(ok){
+    const idx = state.products.findIndex(x=>x.id===updated.id);
+    if(idx>=0) state.products[idx] = updated; else state.products.unshift(updated);
+    state.current = updated;
+    state.fromInquiry = false;
+    showToast(t('update_saved_toast'));
     goto('detail');
   }else{
     btn.disabled=false; btn.style.opacity=1;
@@ -1541,10 +1673,20 @@ function scanLoop(){
       return;
     }
     if(video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0){
-      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      /* Downscale before analysis — QR detection speed depends heavily on
+         pixel count, and phone cameras often output 1080p+ frames. Capping
+         the long edge at ~640px cuts the analysed pixels by 5-10x with no
+         real loss in scan reliability, making each frame much faster. */
+      const MAX_DIM = 640;
+      const vw = video.videoWidth, vh = video.videoHeight;
+      const scale = Math.min(1, MAX_DIM / Math.max(vw, vh));
+      const cw = Math.max(1, Math.round(vw * scale));
+      const ch = Math.max(1, Math.round(vh * scale));
+      if(canvas.width !== cw) canvas.width = cw;
+      if(canvas.height !== ch) canvas.height = ch;
       const ctx = canvas.getContext('2d', { willReadFrequently:true });
-      ctx.drawImage(video,0,0,canvas.width,canvas.height);
-      const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+      ctx.drawImage(video,0,0,cw,ch);
+      const imgData = ctx.getImageData(0,0,cw,ch);
       const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts:'attemptBoth' });
       if(code && code.data){
         stopCamera();
@@ -1587,7 +1729,7 @@ function submitManualCode(){
   resolveScannedCode(val);
 }
 async function resolveScannedCode(raw){
-  setScanMsg(`<p class="cam-hint">...</p>`);
+  setScanMsg(`<p class="cam-hint">${esc(t('looking_up'))}</p>`);
   let id = (raw||'').trim();
   const m = id.match(/RAHAB-PROD::\s*([^\s]+)/);
   if(m){
@@ -1597,9 +1739,17 @@ async function resolveScannedCode(raw){
   }
   const product = await getProduct(id);
   if(product){
-    state.current = product;
-    state.fromInquiry = true;
-    goto('detail');
+    if(state.screen === 'update'){
+      state.current = product;
+      draftColors = (product.colors||[]).slice();
+      draftSizes = (product.sizes||[]).slice();
+      draftImage = product.image || null;
+      goto('edit');
+    }else{
+      state.current = product;
+      state.fromInquiry = true;
+      goto('detail');
+    }
   }else{
     setScanMsg(`<div class="err-box">${esc(t('not_found'))}</div>`);
   }
@@ -1621,15 +1771,40 @@ function catalogScreen(){
   </div>
   `;
 }
+function updatePickerScreen(){
+  const items = state.products || [];
+  return `
+  ${screenHead('update_title','update_pick_desc')}
+  <div class="scan-tabs">
+    <div class="scan-tab ${state.scanTab==='camera'?'active':''}" onclick="setScanTab('camera')">${esc(t('scan_cam'))}</div>
+    <div class="scan-tab ${state.scanTab==='image'?'active':''}" onclick="setScanTab('image')">${esc(t('scan_img'))}</div>
+    <div class="scan-tab ${state.scanTab==='manual'?'active':''}" onclick="setScanTab('manual')">${esc(t('scan_manual'))}</div>
+  </div>
+  <div id="scanArea"></div>
+  <div id="scanMsg"></div>
+  <div style="height:1px;background:var(--border);margin:22px 0 16px;"></div>
+  <p style="font-size:11.5px;font-weight:800;color:var(--text-muted);margin:0 0 10px;letter-spacing:.3px;">${esc(t('or_search_label'))}</p>
+  <div class="search-box">
+    ${ICONS.search}
+    <input type="text" id="catSearch" placeholder="${esc(t('search_ph'))}" oninput="filterCatalog()"/>
+  </div>
+  <div class="prod-list" id="prodList">
+    ${state.productsLoading ? `<div class="empty-state">${ICONS.box}<p>${esc(t('loading_products'))}</p></div>`
+      : state.productsLoadError ? `<div class="err-box">${esc(t('db_test_fail'))}</div>${renderProdList(items)}`
+      : renderProdList(items)}
+  </div>
+  `;
+}
 function renderProdList(items){
   if(!items.length){
     return `<div class="empty-state">${ICONS.package}<p>${esc(t('empty_catalog'))}</p></div>`;
   }
+  const pickMode = state.screen === 'update';
   return items.map(p=>`
-    <div class="prod-row" onclick="openProduct('${p.id}')">
+    <div class="prod-row" onclick="${pickMode ? `startEditProduct('${p.id}')` : `openProduct('${p.id}')`}">
       ${p.image ? `<img src="${p.image}"/>` : `<div style="width:52px;height:52px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-muted);flex-shrink:0;">${ICONS.box}</div>`}
       <div class="pi"><h4>${esc(p.name)}</h4><span>${esc(p.category||'')}</span></div>
-      <div class="pp">${p.price ? esc(p.price)+' '+esc(p.currency||''):''}</div>
+      <div class="pp">${pickMode ? ICONS.edit : (p.price ? esc(p.price)+' '+esc(p.currency||''):'')}</div>
     </div>
   `).join('');
 }
@@ -1647,6 +1822,19 @@ async function openProduct(id){
   let p = state.products.find(x=>x.id===id);
   if(!p) p = await getProduct(id);
   if(p){ state.current = p; state.fromInquiry = false; goto('detail'); }
+}
+function gotoUpdatePicker(){
+  goto('update');
+}
+async function startEditProduct(id){
+  let p = state.products.find(x=>x.id===id);
+  if(!p) p = await getProduct(id);
+  if(!p) return;
+  state.current = p;
+  draftColors = (p.colors||[]).slice();
+  draftSizes = (p.sizes||[]).slice();
+  draftImage = p.image || null;
+  goto('edit');
 }
 
 /* ---------------- DETAIL ---------------- */
@@ -1721,7 +1909,6 @@ function buildTagMarkup(p){
     <p>${esc(p.category||'')}</p>
     <div id="tagQR" style="margin:10px auto;"></div>
     <p style="font-family:'Oswald',sans-serif;letter-spacing:1px;">${esc(p.id)}</p>
-    <p>${esc(p.price?p.price+' '+(p.currency||''):'')}</p>
   </div>`;
 }
 function printTag(){
@@ -1805,10 +1992,10 @@ function settingsScreen(){
     </div>
     <div id="dbMsg"></div>
     <div class="action-row">
-      <button class="btn-secondary" onclick="saveDbUrl()">${ICONS.copy}${esc(t('db_save_btn'))}</button>
-      <button class="btn-secondary" onclick="testDbConnection()">${ICONS.scan}${esc(t('db_test_btn'))}</button>
+      <button class="btn-secondary btn-compact" onclick="saveDbUrl()">${ICONS.copy}${esc(t('db_save_btn'))}</button>
+      <button class="btn-secondary btn-compact" onclick="testDbConnection()">${ICONS.scan}${esc(t('db_test_btn'))}</button>
     </div>
-    ${hasRemoteDB() ? `<button class="btn-secondary btn-danger" style="margin-top:10px;" onclick="disconnectDb()">${ICONS.trash}${esc(t('db_disconnect_btn'))}</button>` : ''}
+    ${hasRemoteDB() ? `<button class="btn-secondary btn-compact btn-danger" style="margin-top:10px;" onclick="disconnectDb()">${ICONS.trash}${esc(t('db_disconnect_btn'))}</button>` : ''}
   </div>
 
   <div class="card" style="margin-top:18px;">
@@ -1864,8 +2051,9 @@ function disconnectDb(){
 
 /* ---------------- bind per-screen extra behaviour ---------------- */
 function bindScreenEvents(){
-  if(state.screen==='inquiry'){ renderScanArea(); }
+  if(state.screen==='inquiry' || state.screen==='update'){ renderScanArea(); }
   if(state.screen==='detail'){ renderQR(); }
+  if(state.screen==='edit'){ updateChipsUI(); }
 }
 
 /* ---------------- boot ---------------- */
