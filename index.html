@@ -971,6 +971,10 @@ const T = {
     settings_span:"تحكم في شكل ولغة البرنامج",
     disp_mode:"وضع العرض", disp_desc:"نهاري أو ليلي", day:"نهاري", night:"ليلي",
     lang_mode:"اللغة", lang_desc:"عربي أو إنجليزي",
+    bg_removal_title:"تبييض خلفية الصور تلقائيًا",
+    bg_removal_desc:"يشيل خلفية أي صورة منتج (يدوي أو مستوردة) ويسيب المنتج بس على خلفية بيضاء — أفضل نتيجة مع خلفيات بسيطة/سادة",
+    on_lbl:"شغّال", off_lbl:"متوقف",
+    processing_image:"جاري معالجة الصورة...",
     confirm_delete:"متأكد إنك عايز تحذف المنتج ده؟",
     yes:"تأكيد", no:"إلغاء",
     scan_result:"نتيجة الاستعلام",
@@ -1000,8 +1004,8 @@ const T = {
     import_parse_error:"حصل خطأ في قراءة الملف. تأكد إنه ملف CSV سليم وجرب تاني.",
     import_preview_msg:"لقينا {count} منتج جاهزين للاستيراد. أي بيانات ناقصة هتتسيب فاضية.",
     import_images_found:"ولقينا {n} صورة اتوصلت بمنتجاتها تلقائيًا.",
-    sheet_link_title:"مزامنة تلقائية من رابط جوجل شيت",
-    sheet_link_desc:"الصق رابط الشيت بتاعك (لازم يكون مشارك بصلاحية \"أي حد معاه الرابط - عرض\")، وكل ما تفتح صفحة الإعدادات هنجيبلك آخر تحديث تلقائي. بيقرا كل الشيتات (Tabs) اللي جوه الملف والصور المدمجة فيها. المنتج اللي اتضاف قبل كده بنفس الرقم في نفس الشيت هيتحدّث مش يتكرر.",
+    sheet_link_title:"رابط الشيت المباشر (تجريبي)",
+    sheet_link_desc:"الصق رابط الشيت واحفظه، وهنحاول نجيب البيانات والصور منه تلقائي كل ما تفتح الإعدادات. مهم: الطريقة دي بتعتمد على إعدادات جوجل وممكن متشتغلش على كل الأجهزة/المتصفحات بسبب قيود تقنية مش في إيدينا (Google بتمنع أحيانًا مواقع تانية من قراءة الرابط ده مباشرة). لو مشتغلتش، استخدم \"روابط CSV منشورة\" تحت — دي الطريقة المضمونة.",
     sheet_link_ph:"الصق رابط Google Sheets هنا",
     sheet_link_save_btn:"حفظ الرابط",
     sheet_link_sync_btn:"مزامنة الآن",
@@ -1014,6 +1018,15 @@ const T = {
     sheet_link_synced_toast:"تمت المزامنة بنجاح",
     sheet_link_bad_url:"الرابط ده مش شكله رابط جوجل شيت صحيح",
     sheet_link_sync_failed:"تعذّرت المزامنة. تأكد إن الشيت مشارك بصلاحية \"أي حد معاه الرابط\" وجرب تاني.",
+    pub_links_title:"روابط CSV منشورة (الطريقة المضمونة)",
+    pub_links_desc:"دي أوثق طريقة تربط بيها الشيت بالأداة، بس بتاخد خطوة إعداد بسيطة لمرة واحدة لكل شيت (Tab): من جوجل شيتس، افتح الشيت اللي عايزه → File (ملف) → Share (مشاركة) → Publish to web (نشر على الويب) → اختار الشيت (Tab) المطلوب من القايمة → اختار CSV → دوس Publish → انسخ الرابط والصقه هنا. كرر الخطوة دي لكل Tab عندك. (ملحوظة: الطريقة دي بتجيب البيانات النصية بس، من غير صور، لأن CSV مبيحملش صور خالص).",
+    pub_link_label_ph:"اسم/تصنيف الشيت (اختياري)",
+    pub_link_url_ph:"الصق رابط الـCSV المنشور هنا",
+    pub_link_add_btn:"إضافة الرابط",
+    pub_links_connected_count:"{n} رابط متصل — بيتفحص تلقائي",
+    pub_links_not_connected:"مفيش روابط مضافة",
+    pub_links_sync_btn:"مزامنة كل الروابط الآن",
+    pub_links_partial_fail:"بعض الروابط فشلت في المزامنة، لكن باقيها اشتغل. راجع الروابط اللي حطيتها.",
     import_confirm_btn:"استيراد المنتجات دي",
     import_progress_start:"جاري استيراد {total} منتج...",
     import_progress:"جاري الاستيراد... {done} من {total}",
@@ -1111,6 +1124,10 @@ const T = {
     settings_span:"Control the app's look and language",
     disp_mode:"Display Mode", disp_desc:"Day or night", day:"Day", night:"Night",
     lang_mode:"Language", lang_desc:"Arabic or English",
+    bg_removal_title:"Auto-whiten photo backgrounds",
+    bg_removal_desc:"Removes the background from any product photo (manual or imported) and leaves just the product on white — works best with simple/plain backgrounds",
+    on_lbl:"On", off_lbl:"Off",
+    processing_image:"Processing image...",
     confirm_delete:"Delete this product?",
     yes:"Confirm", no:"Cancel",
     scan_result:"Inquiry Result",
@@ -1140,8 +1157,8 @@ const T = {
     import_parse_error:"Something went wrong reading the file. Make sure it's a valid CSV and try again.",
     import_preview_msg:"Found {count} products ready to import. Any missing fields will just be left blank.",
     import_images_found:"and found {n} images automatically matched to their products.",
-    sheet_link_title:"Auto-sync from a Google Sheet link",
-    sheet_link_desc:"Paste your sheet's link (it must be shared as \"Anyone with the link – Viewer\"), and every time you open Settings we'll fetch the latest version automatically. It reads every tab in the file and any embedded photos. A product previously imported with the same number in the same tab gets updated, not duplicated.",
+    sheet_link_title:"Direct Sheet Link (experimental)",
+    sheet_link_desc:"Paste your sheet's link and save it, and we'll try to fetch the data and images from it automatically every time you open Settings. Important: this depends on Google's own settings and may not work on every device/browser due to technical restrictions outside our control (Google sometimes blocks other sites from reading this link directly). If it doesn't work, use \"Published CSV links\" below instead — that's the guaranteed method.",
     sheet_link_ph:"Paste the Google Sheets link here",
     sheet_link_save_btn:"Save Link",
     sheet_link_sync_btn:"Sync Now",
@@ -1154,6 +1171,15 @@ const T = {
     sheet_link_synced_toast:"Synced successfully",
     sheet_link_bad_url:"That doesn't look like a valid Google Sheets link",
     sheet_link_sync_failed:"Couldn't sync. Make sure the sheet is shared as \"Anyone with the link\" and try again.",
+    pub_links_title:"Published CSV Links (guaranteed method)",
+    pub_links_desc:"This is the most reliable way to connect a sheet to the tool, but it takes one quick one-time setup step per tab: in Google Sheets, open the sheet you want → File → Share → Publish to web → pick the specific tab from the dropdown → choose CSV → click Publish → copy the link and paste it here. Repeat for each tab you have. (Note: this method brings text data only, no photos, since CSV can't hold images at all).",
+    pub_link_label_ph:"Sheet/tab label (optional)",
+    pub_link_url_ph:"Paste the published CSV link here",
+    pub_link_add_btn:"Add Link",
+    pub_links_connected_count:"{n} link(s) connected — checks automatically",
+    pub_links_not_connected:"No links added",
+    pub_links_sync_btn:"Sync All Links Now",
+    pub_links_partial_fail:"Some links failed to sync, but others worked. Double-check the links you added.",
     import_confirm_btn:"Import These Products",
     import_progress_start:"Importing {total} products...",
     import_progress:"Importing... {done} of {total}",
@@ -1355,6 +1381,88 @@ function resizeImage(file, maxW){
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+}
+
+/* ---------------- BACKGROUND WHITENING ----------------
+   Best-effort, not true AI segmentation (nothing like that is available
+   here). It's a flood fill that starts from the photo's four edges and
+   grows inward through pixels of gradually-similar colour, painting
+   everything it reaches pure white. Works well for typical catalogue shots
+   on a plain/solid backdrop (any colour); it will struggle on cluttered,
+   textured, or busy backgrounds since there's no real understanding of
+   "this is the product" vs "this is behind it" — just colour continuity
+   from the edges inward. Any failure just returns the original image
+   untouched rather than breaking the upload. */
+function removeBackgroundToWhite(dataUrl){
+  return new Promise((resolve)=>{
+    if(!dataUrl){ resolve(dataUrl); return; }
+    const img = new Image();
+    img.onload = ()=>{
+      try{
+        const canvas = document.createElement('canvas');
+        const w = img.width, h = img.height;
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const imgData = ctx.getImageData(0, 0, w, h);
+        const data = imgData.data;
+        const visited = new Uint8Array(w*h);
+        const THRESH = 30;
+        const qx = new Int32Array(w*h);
+        const qy = new Int32Array(w*h);
+        let qHead = 0, qTail = 0;
+        function idx(x,y){ return y*w+x; }
+        function seed(x,y){
+          const i = idx(x,y);
+          if(visited[i]) return;
+          visited[i] = 1;
+          qx[qTail] = x; qy[qTail] = y; qTail++;
+        }
+        function tryGrow(x,y,r,g,b){
+          if(x<0||y<0||x>=w||y>=h) return;
+          const i = idx(x,y);
+          if(visited[i]) return;
+          const p = i*4;
+          const dr = data[p]-r, dg = data[p+1]-g, db = data[p+2]-b;
+          if((dr*dr+dg*dg+db*db) <= THRESH*THRESH){
+            visited[i] = 1;
+            qx[qTail] = x; qy[qTail] = y; qTail++;
+          }
+        }
+        for(let x=0;x<w;x++){ seed(x,0); seed(x,h-1); }
+        for(let y=0;y<h;y++){ seed(0,y); seed(w-1,y); }
+        while(qHead < qTail){
+          const x = qx[qHead], y = qy[qHead]; qHead++;
+          const p = idx(x,y)*4;
+          const r = data[p], g = data[p+1], b = data[p+2];
+          tryGrow(x+1,y,r,g,b);
+          tryGrow(x-1,y,r,g,b);
+          tryGrow(x,y+1,r,g,b);
+          tryGrow(x,y-1,r,g,b);
+        }
+        for(let i=0;i<w*h;i++){
+          if(visited[i]){
+            const p = i*4;
+            data[p]=255; data[p+1]=255; data[p+2]=255; data[p+3]=255;
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+        resolve(canvas.toDataURL('image/jpeg', 0.9));
+      }catch(e){
+        console.error('background removal failed', e);
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = ()=>resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+function autoBgRemovalOn(){
+  const v = localStorage.getItem('rahab_auto_bg');
+  return v === null ? true : v === '1';
+}
+function setAutoBgRemoval(on){
+  localStorage.setItem('rahab_auto_bg', on ? '1' : '0');
 }
 
 /* ---------------- navigation ---------------- */
@@ -1638,10 +1746,13 @@ function removeChip(kind,i){
 function handleImageInput(ev){
   const file = ev.target.files[0];
   if(!file) return;
+  const drop = document.getElementById('imgDrop');
+  drop.innerHTML = `<p class="cam-hint" style="margin:0;">${esc(t('processing_image'))}</p>`;
   resizeImage(file, 900).then(dataUrl=>{
-    draftImage = dataUrl;
-    const drop = document.getElementById('imgDrop');
-    drop.innerHTML = `<img src="${dataUrl}"/><input type="file" accept="image/*" id="f_image" onchange="handleImageInput(event)"/>`;
+    return autoBgRemovalOn() ? removeBackgroundToWhite(dataUrl) : dataUrl;
+  }).then(finalUrl=>{
+    draftImage = finalUrl;
+    drop.innerHTML = `<img src="${finalUrl}"/><input type="file" accept="image/*" id="f_image" onchange="handleImageInput(event)"/>`;
   }).catch(()=>showToast('!'));
 }
 function getMissingFieldLabels(){
@@ -2347,6 +2458,13 @@ function settingsScreen(){
       <button class="${state.lang==='en'?'on':''}" onclick="setLang('en')">EN</button>
     </div>
   </div>
+  <div class="set-row">
+    <div class="si"><div class="icwrap">${ICONS.camera}</div><div><h4>${esc(t('bg_removal_title'))}</h4><span>${esc(t('bg_removal_desc'))}</span></div></div>
+    <div class="seg">
+      <button class="${autoBgRemovalOn()?'on':''}" onclick="setAutoBgRemoval(true);render();">${esc(t('on_lbl'))}</button>
+      <button class="${!autoBgRemovalOn()?'on':''}" onclick="setAutoBgRemoval(false);render();">${esc(t('off_lbl'))}</button>
+    </div>
+  </div>
   <div class="perm-note" style="margin-top:2px;">${ICONS.shield}<span>${hasRemoteDB() ? esc(t('db_shared_note')) : esc(t('storage_perm_note'))}</span></div>
 
   <div class="card" style="margin-top:18px;">
@@ -2414,6 +2532,37 @@ function settingsScreen(){
       <button class="btn-secondary btn-compact" onclick="syncFromSheetLink(true)">${ICONS.scan}${esc(t('sheet_link_sync_btn'))}</button>
     </div>
     ${sheetUrl() ? `<button class="btn-secondary btn-compact btn-danger" style="margin-top:10px;" onclick="clearSheetLink()">${ICONS.trash}${esc(t('sheet_link_disconnect_btn'))}</button>` : ''}
+  </div>
+
+  <div class="card" style="margin-top:18px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div style="color:${pubLinks().length ? 'var(--gold)' : 'var(--text-muted)'};">${ICONS.checkSquare}</div>
+      <div>
+        <h4 style="margin:0 0 2px;font-size:12.5px;font-weight:800;">${esc(t('pub_links_title'))}</h4>
+        <span style="font-size:10.5px;color:${pubLinks().length?'var(--gold)':'var(--text-muted)'};font-weight:700;">${pubLinks().length ? t('pub_links_connected_count').replace('{n}', pubLinks().length) : esc(t('pub_links_not_connected'))}</span>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--text-muted);line-height:1.8;margin:0 0 10px;">${esc(t('pub_links_desc'))}</p>
+    <div class="row2" style="margin-bottom:10px;">
+      <div class="field" style="margin-bottom:0;">
+        <input type="text" id="pubLinkLabel" placeholder="${esc(t('pub_link_label_ph'))}"/>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <input type="text" id="pubLinkUrl" placeholder="${esc(t('pub_link_url_ph'))}" dir="ltr" style="text-align:left;"/>
+      </div>
+    </div>
+    <button class="btn-secondary btn-compact" style="margin-bottom:12px;" onclick="addPubLink()">${ICONS.plus}${esc(t('pub_link_add_btn'))}</button>
+    ${pubLinks().length ? `
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+      ${pubLinks().map((l,i)=>`
+        <div style="display:flex;align-items:center;gap:8px;background:var(--surface-2);border-radius:10px;padding:9px 11px;">
+          <span style="flex:1;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l.label)}</span>
+          <button onclick="removePubLink(${i})" style="background:none;border:none;color:var(--red);font-size:16px;font-weight:900;cursor:pointer;line-height:1;">&times;</button>
+        </div>
+      `).join('')}
+    </div>` : ''}
+    <div id="pubLinksMsg"></div>
+    <button class="btn-primary" onclick="syncPublishedLinks(true)">${ICONS.scan}${esc(t('pub_links_sync_btn'))}</button>
   </div>
 
   <div class="card" style="margin-top:18px;">
@@ -2518,6 +2667,107 @@ async function syncFromSheetLink(manual){
     console.error('sheet sync failed', err);
     if(manual && msg) msg.innerHTML = `<div class="err-box">${esc(t('sheet_link_sync_failed'))}</div>`;
   }
+}
+
+/* ---------------- PUBLISHED CSV LINKS (reliable multi-sheet sync) ----------------
+   The direct /export?format=xlsx link above is blocked by the browser's CORS
+   policy on many setups since Google doesn't serve it with cross-origin
+   headers for arbitrary sites — so it only works some of the time. Google's
+   own "Publish to the web" CSV links ARE meant for exactly this kind of
+   external consumption and reliably support cross-origin fetches, so they're
+   the dependable path. Downside: publishing only covers one tab at a time and
+   never carries images (CSV can't hold pictures) — so this list complements,
+   rather than replaces, the single xlsx link above. */
+function pubLinks(){
+  try{ return JSON.parse(localStorage.getItem('rahab_pub_links') || '[]'); }
+  catch(e){ return []; }
+}
+function savePubLinksStored(list){
+  localStorage.setItem('rahab_pub_links', JSON.stringify(list));
+}
+function addPubLink(){
+  const labelEl = document.getElementById('pubLinkLabel');
+  const urlEl = document.getElementById('pubLinkUrl');
+  const label = labelEl.value.trim();
+  const url = urlEl.value.trim();
+  if(!url) return;
+  const list = pubLinks();
+  list.push({ label: label || url, url });
+  savePubLinksStored(list);
+  render();
+}
+function removePubLink(idx){
+  const list = pubLinks();
+  list.splice(idx, 1);
+  savePubLinksStored(list);
+  render();
+}
+async function syncPublishedLinks(manual){
+  const links = pubLinks();
+  const msg = document.getElementById('pubLinksMsg');
+  if(!links.length) return;
+  if(manual && msg) msg.innerHTML = `<p class="cam-hint">${esc(t('sheet_link_syncing'))}</p>`;
+  const all = [];
+  let anyFail = false;
+  for(const link of links){
+    try{
+      if(typeof Papa === 'undefined') throw new Error('papa missing');
+      const res = await fetch(link.url);
+      if(!res.ok) throw new Error('network ' + res.status);
+      const text = await res.text();
+      const parsed = Papa.parse(text, { skipEmptyLines:false });
+      const products = parseInventoryRows(parsed.data || [], link.label || link.url);
+      products.forEach(p=>{ delete p._sheetRow; });
+      all.push.apply(all, products);
+    }catch(e){
+      console.error('published link sync failed', link.url, e);
+      anyFail = true;
+    }
+  }
+  if(!all.length){
+    if(msg) msg.innerHTML = `<div class="err-box">${esc(anyFail ? t('sheet_link_sync_failed') : t('import_none_found'))}</div>`;
+    return;
+  }
+  if(msg) msg.innerHTML = anyFail ? `<div class="err-box">${esc(t('pub_links_partial_fail'))}</div>` : '';
+  finishImportParse(all);
+  if(manual) showToast(t('sheet_link_synced_toast'));
+}
+
+/* Runs on Settings screen load when at least one auto-sync source is saved.
+   Combines results from BOTH the xlsx link and every published CSV link into
+   ONE preview instead of letting them race and overwrite each other. */
+async function autoSyncAllSources(){
+  const combined = [];
+  const url = sheetUrl();
+  if(url){
+    const id = extractSheetId(url);
+    if(id && typeof XLSX !== 'undefined' && typeof JSZip !== 'undefined'){
+      try{
+        const res = await fetch('https://docs.google.com/spreadsheets/d/' + id + '/export?format=xlsx');
+        if(res.ok){
+          const buf = await res.arrayBuffer();
+          const products = await parseWorkbookAllSheets(buf);
+          combined.push.apply(combined, products);
+        }
+      }catch(e){ console.error('auto xlsx sync failed', e); }
+    }
+  }
+  const links = pubLinks();
+  if(links.length && typeof Papa !== 'undefined'){
+    for(const link of links){
+      try{
+        const res = await fetch(link.url);
+        if(res.ok){
+          const text = await res.text();
+          const parsed = Papa.parse(text, { skipEmptyLines:false });
+          const products = parseInventoryRows(parsed.data || [], link.label || link.url);
+          products.forEach(p=>{ delete p._sheetRow; });
+          combined.push.apply(combined, products);
+        }
+      }catch(e){ console.error('auto published link sync failed', link.url, e); }
+    }
+  }
+  if(combined.length) finishImportParse(combined);
 }
 
 /* ---------------- CSV IMPORT ---------------- */
@@ -2792,7 +3042,8 @@ async function extractXlsxImages(zip, targetSheetName){
     const base64 = await mediaFile.async('base64');
     const ext = mediaPath.split('.').pop().toLowerCase();
     const mime = ext==='png' ? 'image/png' : (ext==='gif' ? 'image/gif' : (ext==='bmp' ? 'image/bmp' : 'image/jpeg'));
-    imagesByRow[rowIdx0 + 1] = 'data:' + mime + ';base64,' + base64;
+    const rawUrl = 'data:' + mime + ';base64,' + base64;
+    imagesByRow[rowIdx0 + 1] = autoBgRemovalOn() ? await removeBackgroundToWhite(rawUrl) : rawUrl;
   }
   return imagesByRow;
 }
@@ -2835,7 +3086,7 @@ function bindScreenEvents(){
   if(state.screen==='inquiry' || state.screen==='update'){ renderScanArea(); }
   if(state.screen==='detail'){ renderQR(); updateSalePrice(); }
   if(state.screen==='edit'){ updateChipsUI(); }
-  if(state.screen==='settings' && sheetUrl()){ syncFromSheetLink(false); }
+  if(state.screen==='settings' && (sheetUrl() || pubLinks().length)){ autoSyncAllSources(); }
 }
 
 /* ---------------- boot ---------------- */
