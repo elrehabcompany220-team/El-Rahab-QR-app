@@ -729,6 +729,13 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   .select-bar .btn-primary{width:auto;}
   .empty-state{text-align:center;padding:50px 20px;color:var(--text-muted);}
   .empty-state svg{width:44px;height:44px;margin-bottom:14px;opacity:.5;}
+  .log-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 13px;}
+  .log-icon{width:36px;height:36px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--navy);flex-shrink:0;}
+  .log-icon svg{width:16px;height:16px;}
+  .theme-dark .log-icon{color:var(--gold);}
+  .set-arrow{color:var(--text-muted);display:flex;align-items:center;flex-shrink:0;}
+  .set-arrow svg{width:16px;height:16px;transform:scaleX(var(--flip,1));}
+  [dir="rtl"] .set-arrow svg{transform:scaleX(-1);}
   .empty-state p{font-size:13px;margin:0;}
 
   /* ---------- Settings ---------- */
@@ -754,13 +761,20 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
 
   #print-area{display:none;}
-  .print-tag{width:280px;margin:0 auto;text-align:center;font-family:var(--font-body);border:2px solid #13213D;border-radius:14px;padding:16px;background:#fff;color:#13213D;}
+  .print-tag{
+    width:280px;margin:0 auto;text-align:center;font-family:var(--font-body);border:2px solid #13213D;
+    border-radius:14px;padding:16px;background:#fff;color:#13213D;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  }
   .print-tag h5{margin:8px 0 2px;font-size:15px;}
   .print-tag p{margin:0;font-size:11px;color:#555;}
+  .qr-4cm{width:40mm;height:50mm;margin:8px auto;}
+  .qr-4cm canvas, .qr-4cm img{width:100% !important;height:100% !important;display:block;}
   .print-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6mm;width:100%;}
   .print-tag-sm{
     width:auto;padding:8px;border:1.5px solid #13213D;border-radius:8px;
     break-inside:avoid;page-break-inside:avoid;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
   }
   .print-tag-sm h5{font-size:10.5px;margin:4px 0 2px;line-height:1.3;max-height:2.6em;overflow:hidden;}
   .print-tag-sm p{font-size:8.5px;}
@@ -969,6 +983,19 @@ const T = {
     empty_search:"مفيش نتائج مطابقة",
     settings_head:"الإعدادات",
     settings_span:"تحكم في شكل ولغة البرنامج",
+    activity_log_title:"سجل العمليات",
+    activity_log_desc:"كل عمليات الإضافة والتحديث والاستعلام والحذف بالتاريخ واليوم والوقت",
+    activity_log_row_desc:"شوف تاريخ كل عملية اتعملت على المنتجات",
+    log_empty:"لسه معملتش أي عملية",
+    clear_log_btn:"مسح السجل",
+    confirm_clear_log:"متأكد إنك عايز تمسح سجل العمليات كله؟ الخطوة دي مش هترجع.",
+    log_cleared_toast:"تم مسح السجل",
+    log_action_add:"تمت إضافة منتج",
+    log_action_update:"تم تحديث منتج",
+    log_action_inquiry:"تم الاستعلام عن منتج",
+    log_action_delete:"تم حذف منتج",
+    log_action_bulk_delete:"تم حذف {n} منتج مرة واحدة",
+    log_action_import:"تم استيراد {n} منتج",
     disp_mode:"وضع العرض", disp_desc:"نهاري أو ليلي", day:"نهاري", night:"ليلي",
     lang_mode:"اللغة", lang_desc:"عربي أو إنجليزي",
     confirm_delete:"متأكد إنك عايز تحذف المنتج ده؟",
@@ -998,7 +1025,7 @@ const T = {
     import_parsing:"جاري قراءة الملف...",
     import_none_found:"معلش، مش لاقي أي منتجات في الملف ده. تأكد إنه نفس شكل شيت الجرد بتاعك.",
     import_parse_error:"حصل خطأ في قراءة الملف. تأكد إنه ملف CSV سليم وجرب تاني.",
-    import_preview_msg:"لقينا {count} منتج جاهزين للاستيراد. أي بيانات ناقصة هتتسيب فاضية.",
+    import_preview_msg:"لقينا {count} منتج جاهزين للاستيراد. أي بيانات ناقصة هتتسجل تلقائي كـ (n/a).",
     import_images_found:"ولقينا {n} صورة اتوصلت بمنتجاتها تلقائيًا.",
     sheet_link_title:"مزامنة تلقائية من رابط جوجل شيت",
     sheet_link_desc:"الصق رابط الشيت بتاعك (لازم يكون مشارك بصلاحية \"أي حد معاه الرابط - عرض\")، وكل ما تفتح صفحة الإعدادات هنجيبلك آخر تحديث تلقائي. بيقرا كل الشيتات (Tabs) اللي جوه الملف والصور المدمجة فيها. المنتج اللي اتضاف قبل كده بنفس الرقم في نفس الشيت هيتحدّث مش يتكرر.",
@@ -1026,6 +1053,8 @@ const T = {
     save_as_na_btn:"احفظ كـ n/a",
     select_multiple_btn:"تحديد متعدد",
     cancel_select_btn:"إلغاء التحديد",
+    select_all_lbl:"تحديد الكل",
+    clear_selection_lbl:"مسح التحديد",
     selected_count:"محدد: {n}",
     delete_selected_btn:"حذف المحدد",
     confirm_bulk_delete:"متأكد إنك عايز تحذف {n} منتج؟ الخطوة دي مش هترجع.",
@@ -1109,6 +1138,19 @@ const T = {
     empty_search:"No matching results",
     settings_head:"Settings",
     settings_span:"Control the app's look and language",
+    activity_log_title:"Activity Log",
+    activity_log_desc:"Every add, update, inquiry, and delete with the date, day, and time",
+    activity_log_row_desc:"See a history of everything done to your products",
+    log_empty:"No activity yet",
+    clear_log_btn:"Clear Log",
+    confirm_clear_log:"Delete the whole activity log? This can't be undone.",
+    log_cleared_toast:"Log cleared",
+    log_action_add:"Product added",
+    log_action_update:"Product updated",
+    log_action_inquiry:"Product looked up",
+    log_action_delete:"Product deleted",
+    log_action_bulk_delete:"Deleted {n} products at once",
+    log_action_import:"Imported {n} products",
     disp_mode:"Display Mode", disp_desc:"Day or night", day:"Day", night:"Night",
     lang_mode:"Language", lang_desc:"Arabic or English",
     confirm_delete:"Delete this product?",
@@ -1166,6 +1208,8 @@ const T = {
     save_as_na_btn:"Save as n/a",
     select_multiple_btn:"Select Multiple",
     cancel_select_btn:"Cancel Selection",
+    select_all_lbl:"Select All",
+    clear_selection_lbl:"Clear Selection",
     selected_count:"Selected: {n}",
     delete_selected_btn:"Delete Selected",
     confirm_bulk_delete:"Delete {n} products? This can't be undone.",
@@ -1210,6 +1254,7 @@ const ICONS = {
   checkSquare:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
   close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  history:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 3 3 8 8 8"/><polyline points="12 7 12 12 16 14"/></svg>',
 };
 
 /* ---------------- state ---------------- */
@@ -1236,7 +1281,62 @@ let pendingDelete = null;
 
 function t(key){ return T[state.lang][key] || key; }
 function esc(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function uid(){ return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function uid(){
+  const letter = String.fromCharCode(65 + Math.floor(Math.random()*26));
+  const num = Math.floor(Math.random()*99999) + 1;
+  return letter + '-' + num;
+}
+
+/* ---------------- ACTIVITY LOG ---------------- */
+function getActivityLog(){
+  try{ return JSON.parse(localStorage.getItem('rahab_activity_log') || '[]'); }
+  catch(e){ return []; }
+}
+function logActivity(action, productId, productName, count){
+  try{
+    const log = getActivityLog();
+    log.unshift({ ts: Date.now(), action, productId: productId||'', productName: productName||'', count: count||0 });
+    localStorage.setItem('rahab_activity_log', JSON.stringify(log.slice(0, 500)));
+  }catch(e){ console.error('activity log write failed', e); }
+  if(hasRemoteDB()){
+    remoteLogEvent(action, productId, productName, count).catch(e=>console.error('remote log failed', e));
+  }
+}
+async function remoteLogEvent(action, productId, productName, count){
+  return fetch(DB_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({ action:'logEvent', event:{ action, productId:productId||'', productName:productName||'', count:count||0, ts:Date.now() } })
+  });
+}
+function formatLogTimestamp(ts){
+  const d = new Date(ts);
+  const locale = state.lang === 'ar' ? 'ar-EG' : 'en-US';
+  const datePart = d.toLocaleDateString(locale, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const timePart = d.toLocaleTimeString(locale, { hour:'2-digit', minute:'2-digit' });
+  return datePart + ' — ' + timePart;
+}
+function logActionMeta(action){
+  const map = {
+    add:{ icon:ICONS.plus, color:'var(--gold)' },
+    update:{ icon:ICONS.edit, color:'var(--gold)' },
+    inquiry:{ icon:ICONS.scan, color:'var(--navy)' },
+    delete:{ icon:ICONS.trash, color:'var(--red)' },
+    bulk_delete:{ icon:ICONS.trash, color:'var(--red)' },
+    import:{ icon:ICONS.upload, color:'var(--gold)' },
+  };
+  return map[action] || { icon:ICONS.box, color:'var(--text-muted)' };
+}
+function logEntryText(entry){
+  if(entry.action === 'bulk_delete') return t('log_action_bulk_delete').replace('{n}', entry.count||0);
+  if(entry.action === 'import') return t('log_action_import').replace('{n}', entry.count||0);
+  const labels = {
+    add:t('log_action_add'), update:t('log_action_update'),
+    inquiry:t('log_action_inquiry'), delete:t('log_action_delete'),
+  };
+  const label = labels[entry.action] || entry.action;
+  return entry.productName ? label + ' — ' + entry.productName : label;
+}
 
 function showToast(msg){
   const el = document.getElementById('toast');
@@ -1244,6 +1344,9 @@ function showToast(msg){
   el.classList.add('show');
   clearTimeout(window.__toastT);
   window.__toastT = setTimeout(()=>el.classList.remove('show'), 2200);
+}
+function clearActivityLog(){
+  localStorage.removeItem('rahab_activity_log');
 }
 
 /* ---------------- persistence ---------------- */
@@ -1416,6 +1519,7 @@ function screenHTML(){
     case 'settings': return settingsScreen();
     case 'detail': return detailScreen();
     case 'edit': return editScreen();
+    case 'log': return logScreen();
     default: return homeScreen();
   }
 }
@@ -1487,7 +1591,16 @@ function addScreen(){
     <div class="field">
       <label>${esc(t('f_sizes'))}</label>
       <div class="chip-input">
-        <input type="text" id="f_size_in" placeholder="${esc(t('f_sizes_ph'))}"/>
+        <input type="number" id="f_size_num" placeholder="0" step="0.1" min="0" style="flex:0 0 78px;"/>
+        <select id="f_size_unit" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:0 10px;font-family:var(--font-body);font-size:13.5px;color:var(--text);">
+          <option value="سم">سم</option>
+          <option value="لتر">لتر</option>
+          <option value="مل">مل</option>
+          <option value="كيلو">كيلو</option>
+          <option value="جرام">جرام</option>
+          <option value="بوصة">بوصة</option>
+          <option value="اونز">اونز</option>
+        </select>
         <button type="button" onclick="addChip('size')">${esc(t('add_chip'))}</button>
       </div>
       <div class="chips" id="sizesChips"></div>
@@ -1564,7 +1677,16 @@ function editScreen(){
     <div class="field">
       <label>${esc(t('f_sizes'))}</label>
       <div class="chip-input">
-        <input type="text" id="f_size_in" placeholder="${esc(t('f_sizes_ph'))}"/>
+        <input type="number" id="f_size_num" placeholder="0" step="0.1" min="0" style="flex:0 0 78px;"/>
+        <select id="f_size_unit" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:0 10px;font-family:var(--font-body);font-size:13.5px;color:var(--text);">
+          <option value="سم">سم</option>
+          <option value="لتر">لتر</option>
+          <option value="مل">مل</option>
+          <option value="كيلو">كيلو</option>
+          <option value="جرام">جرام</option>
+          <option value="بوصة">بوصة</option>
+          <option value="اونز">اونز</option>
+        </select>
         <button type="button" onclick="addChip('size')">${esc(t('add_chip'))}</button>
       </div>
       <div class="chips" id="sizesChips"></div>
@@ -1622,11 +1744,21 @@ function updateChipsUI(){
     `<div class="chip">${esc(c)}<button onclick="removeChip('size',${i})">&times;</button></div>`).join('');
 }
 function addChip(kind){
-  const inputId = kind==='color' ? 'f_color_in' : 'f_size_in';
-  const input = document.getElementById(inputId);
+  if(kind === 'size'){
+    const numEl = document.getElementById('f_size_num');
+    const unitEl = document.getElementById('f_size_unit');
+    const num = numEl.value.trim();
+    if(!num) return;
+    draftSizes.push(num + ' ' + unitEl.value);
+    numEl.value = '';
+    numEl.focus();
+    updateChipsUI();
+    return;
+  }
+  const input = document.getElementById('f_color_in');
   const val = input.value.trim();
   if(!val) return;
-  if(kind==='color') draftColors.push(val); else draftSizes.push(val);
+  draftColors.push(val);
   input.value = '';
   input.focus();
   updateChipsUI();
@@ -1698,11 +1830,17 @@ async function submitProduct(){
   errBox.innerHTML = '';
   await doSubmitProduct(false);
 }
+function uniqueUid(){
+  let id = uid();
+  let tries = 0;
+  while(state.products.some(p=>p.id===id) && tries < 10){ id = uid(); tries++; }
+  return id;
+}
 async function doSubmitProduct(fillNA){
   const errBox = document.getElementById('addErr');
   const fields = readProductFormValues(fillNA);
   const product = Object.assign({
-    id: uid(),
+    id: uniqueUid(),
     name: document.getElementById('f_name').value.trim(),
     image: draftImage,
     createdAt: Date.now(),
@@ -1714,6 +1852,7 @@ async function doSubmitProduct(fillNA){
     state.products.unshift(product);
     state.current = product;
     state.fromInquiry = false;
+    logActivity('add', product.id, product.name);
     showToast(t('saved_toast'));
     goto('detail');
   }else{
@@ -1756,6 +1895,7 @@ async function doSubmitProductEdit(fillNA){
     if(idx>=0) state.products[idx] = updated; else state.products.unshift(updated);
     state.current = updated;
     state.fromInquiry = false;
+    logActivity('update', updated.id, updated.name);
     showToast(t('update_saved_toast'));
     goto('detail');
   }else{
@@ -1998,6 +2138,7 @@ async function resolveScannedCode(raw){
     }else{
       state.current = product;
       state.fromInquiry = true;
+      logActivity('inquiry', product.id, product.name);
       goto('detail');
     }
   }else{
@@ -2010,7 +2151,12 @@ function catalogScreen(){
   const items = state.products || [];
   return `
   ${screenHead('all_products','settings_span')}
-  <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;">
+    ${state.selectMode ? `
+    <div style="display:flex;gap:14px;">
+      <button onclick="selectAllVisible()" style="background:none;border:none;color:var(--red);font-size:12.5px;font-weight:800;cursor:pointer;padding:0;">${esc(t('select_all_lbl'))}</button>
+      <button onclick="clearSelectionItems()" style="background:none;border:none;color:var(--text-muted);font-size:12.5px;font-weight:800;cursor:pointer;padding:0;">${esc(t('clear_selection_lbl'))}</button>
+    </div>` : `<span></span>`}
     <button class="btn-secondary btn-compact" style="width:auto;padding:9px 14px;" onclick="toggleSelectMode()">
       ${state.selectMode ? ICONS.close : ICONS.checkSquare}${esc(state.selectMode ? t('cancel_select_btn') : t('select_multiple_btn'))}
     </button>
@@ -2082,6 +2228,18 @@ function toggleSelectMode(){
   state.selectedIds = new Set();
   render();
 }
+function selectAllVisible(){
+  const rows = document.querySelectorAll('#prodList .prod-row');
+  rows.forEach(row=>{
+    const id = row.getAttribute('data-id');
+    if(id) state.selectedIds.add(id);
+  });
+  render();
+}
+function clearSelectionItems(){
+  state.selectedIds = new Set();
+  render();
+}
 function toggleSelectItem(id){
   if(state.selectedIds.has(id)) state.selectedIds.delete(id); else state.selectedIds.add(id);
   const row = document.querySelector(`.prod-row[data-id="${id}"]`);
@@ -2121,6 +2279,7 @@ async function confirmBulkDelete(){
   state.products = state.products.filter(p=>!ids.includes(p.id));
   state.selectedIds = new Set();
   state.selectMode = false;
+  logActivity('bulk_delete', '', '', ids.length);
   showToast(t('bulk_deleted_toast').replace('{n}', ids.length));
   render();
 }
@@ -2244,8 +2403,10 @@ function askDelete(id){
     </div>`;
 }
 async function confirmDelete(id){
+  const name = (state.current && state.current.id===id) ? state.current.name : ((state.products.find(p=>p.id===id)||{}).name || '');
   await deleteProductStorage(id);
   state.products = state.products.filter(p=>p.id!==id);
+  logActivity('delete', id, name);
   showToast(t('deleted_toast'));
   goto('catalog');
 }
@@ -2254,7 +2415,7 @@ function buildTagMarkup(p){
     <img src="${LOGO_SRC}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;"/>
     <h5>${esc(p.name)}</h5>
     <p>${esc(p.category||'')}</p>
-    <div id="tagQR" style="margin:10px auto;"></div>
+    <div id="tagQR" class="qr-4cm"></div>
     <p style="font-family:'Oswald',sans-serif;letter-spacing:1px;">${esc(p.id)}</p>
   </div>`;
 }
@@ -2264,7 +2425,7 @@ function printTag(){
   const area = document.getElementById('print-area');
   area.innerHTML = buildTagMarkup(p);
   new QRCode(document.getElementById('tagQR'), {
-    text:'RAHAB-PROD::'+p.id, width:150, height:150, colorDark:'#13213D', colorLight:'#ffffff'
+    text:'RAHAB-PROD::'+p.id, width:480, height:480, colorDark:'#13213D', colorLight:'#ffffff'
   });
   setTimeout(()=>{ window.print(); }, 150);
 }
@@ -2281,14 +2442,14 @@ function printSelectedTags(){
       <div class="print-tag print-tag-sm">
         <h5>${esc(p.name)}</h5>
         ${p.category ? `<p style="margin-bottom:2px;">${esc(p.category)}</p>` : ''}
-        <div id="gridQR${i}" style="margin:6px auto;"></div>
+        <div id="gridQR${i}" class="qr-4cm"></div>
         <p style="font-family:'Oswald',sans-serif;letter-spacing:.5px;">${esc(p.id)}</p>
       </div>
     `).join('')}
   </div>`;
   products.forEach((p,i)=>{
     new QRCode(document.getElementById('gridQR'+i), {
-      text:'RAHAB-PROD::'+p.id, width:100, height:100, colorDark:'#13213D', colorLight:'#ffffff'
+      text:'RAHAB-PROD::'+p.id, width:480, height:480, colorDark:'#13213D', colorLight:'#ffffff'
     });
   });
   setTimeout(()=>{ window.print(); }, 200);
@@ -2307,7 +2468,7 @@ async function downloadTagPDF(){
     area.innerHTML = buildTagMarkup(p);
     area.style.cssText = 'display:block;position:fixed;top:0;left:-9999px;z-index:-1;';
     new QRCode(document.getElementById('tagQR'), {
-      text:'RAHAB-PROD::'+p.id, width:150, height:150, colorDark:'#13213D', colorLight:'#ffffff'
+      text:'RAHAB-PROD::'+p.id, width:480, height:480, colorDark:'#13213D', colorLight:'#ffffff'
     });
     await new Promise(r=>setTimeout(r, 200));
     const box = document.getElementById('tagCaptureBox');
@@ -2333,6 +2494,10 @@ async function downloadTagPDF(){
 function settingsScreen(){
   return `
   ${screenHead('settings_head','settings_span')}
+  <div class="set-row" onclick="goto('log')" style="cursor:pointer;">
+    <div class="si"><div class="icwrap">${ICONS.history}</div><div><h4>${esc(t('activity_log_title'))}</h4><span>${esc(t('activity_log_row_desc'))}</span></div></div>
+    <div class="set-arrow">${ICONS.arrow}</div>
+  </div>
   <div class="set-row">
     <div class="si"><div class="icwrap">${ICONS.sun}</div><div><h4>${esc(t('disp_mode'))}</h4><span>${esc(t('disp_desc'))}</span></div></div>
     <div class="seg">
@@ -2437,6 +2602,46 @@ function settingsScreen(){
   `;
 }
 function setTheme(th){ state.theme = th; saveSettings(); render(); }
+
+/* ---------------- ACTIVITY LOG SCREEN ---------------- */
+function logScreen(){
+  const logs = getActivityLog();
+  return `
+  ${screenHead('activity_log_title','activity_log_desc')}
+  ${logs.length ? `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+      <button class="btn-secondary btn-compact" style="width:auto;padding:8px 14px;" onclick="askClearLog()">${ICONS.trash}${esc(t('clear_log_btn'))}</button>
+    </div>
+    <div id="clearLogConfirm"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      ${logs.map(entry=>`
+        <div class="log-row">
+          <div class="log-icon" style="color:${logActionMeta(entry.action).color};">${logActionMeta(entry.action).icon}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:800;">${esc(logEntryText(entry))}</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${esc(formatLogTimestamp(entry.ts))}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  ` : `<div class="empty-state">${ICONS.box}<p>${esc(t('log_empty'))}</p></div>`}
+  `;
+}
+function askClearLog(){
+  document.getElementById('clearLogConfirm').innerHTML = `
+    <div class="card" style="margin-bottom:14px;">
+      <p style="margin:0 0 14px;font-size:13px;font-weight:700;">${esc(t('confirm_clear_log'))}</p>
+      <div class="action-row">
+        <button class="btn-secondary btn-danger" onclick="confirmClearLog()">${esc(t('yes'))}</button>
+        <button class="btn-secondary" onclick="document.getElementById('clearLogConfirm').innerHTML=''">${esc(t('no'))}</button>
+      </div>
+    </div>`;
+}
+function confirmClearLog(){
+  clearActivityLog();
+  showToast(t('log_cleared_toast'));
+  render();
+}
 function setLang(l){ state.lang = l; saveSettings(); render(); }
 function saveDbUrl(){
   const val = document.getElementById('dbUrlInput').value.trim();
@@ -2700,13 +2905,13 @@ function parseInventoryRows(rows, sheetKey){
       id: 'imp' + sheetHash + '_' + idCell,
       name,
       category: '',
-      colors: attrs.colors,
-      sizes: attrs.sizes,
-      origin,
-      price,
+      colors: attrs.colors.length ? attrs.colors : ['n/a'],
+      sizes: attrs.sizes.length ? attrs.sizes : ['n/a'],
+      origin: origin || 'n/a',
+      price: price || 'n/a',
       currency: '',
-      supplier,
-      quantity,
+      supplier: supplier || 'n/a',
+      quantity: quantity || 'n/a',
       notes: stockNote,
       image: null,
       createdAt: Date.now(),
@@ -2798,8 +3003,8 @@ async function extractXlsxImages(zip, targetSheetName){
 }
 async function confirmImport(){
   if(!pendingImportRows || !pendingImportRows.length) return;
-  const category = document.getElementById('importCategory').value.trim();
-  const currency = document.getElementById('importCurrency').value;
+  const category = document.getElementById('importCategory').value.trim() || 'n/a';
+  const currency = document.getElementById('importCurrency').value || 'n/a';
   const msg = document.getElementById('importMsg');
   const list = pendingImportRows.map(p=>Object.assign({}, p, { category, currency }));
   const total = list.length;
@@ -2810,6 +3015,7 @@ async function confirmImport(){
       await remoteBulkSave(list);
       pendingImportRows = null;
       state.productsLoaded = false;
+      logActivity('import', '', '', total);
       msg.innerHTML = `<div class="perm-note">${ICONS.shield}<span>${t('import_done_msg_simple').replace('{count}', total)}</span></div>`;
       showToast(t('import_done_toast'));
     }catch(e){
@@ -2826,6 +3032,7 @@ async function confirmImport(){
   }
   pendingImportRows = null;
   state.productsLoaded = false;
+  if(done) logActivity('import', '', '', done);
   msg.innerHTML = `<div class="perm-note">${ICONS.shield}<span>${t('import_done_msg_simple').replace('{count}', done)}</span></div>`;
   showToast(t('import_done_toast'));
 }
