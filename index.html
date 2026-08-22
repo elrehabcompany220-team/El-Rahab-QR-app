@@ -2849,6 +2849,20 @@ function simpleHash(str){
   for(let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) | 0; }
   return Math.abs(h).toString(36);
 }
+/* Same visible "letter-numbers" format as manually-added products, but
+   derived deterministically from (sheet name + the row's own number) so
+   re-importing/re-syncing the same row always regenerates the SAME id —
+   that's what makes sync update a product instead of duplicating it. */
+function stableImportId(sheetKey, idCell){
+  const hash = simpleHash(sheetKey || 'sheet');
+  let letterSeed = 0;
+  for(let i=0;i<hash.length;i++) letterSeed += hash.charCodeAt(i);
+  const letter = String.fromCharCode(65 + (letterSeed % 26));
+  let hashNum = 0;
+  for(let i=0;i<hash.length;i++) hashNum = (hashNum * 36 + hash.charCodeAt(i)) % 90;
+  const num = (hashNum * 1000) + (parseInt(idCell, 10) % 1000);
+  return letter + '-' + num;
+}
 function parseInventoryRows(rows, sheetKey){
   if(!rows || rows.length < 3) return [];
   const header0 = rows[0] || [];
@@ -2872,7 +2886,6 @@ function parseInventoryRows(rows, sheetKey){
   const stock2Col = findCol(['المخزن']);
   if(nameCol < 0) return [];
 
-  const sheetHash = simpleHash(sheetKey || 'sheet');
   const products = [];
   for(let r=2;r<rows.length;r++){
     const row = rows[r];
@@ -2902,7 +2915,7 @@ function parseInventoryRows(rows, sheetKey){
     const attrs = extractAttrsFromName(name);
 
     products.push({
-      id: 'imp' + sheetHash + '_' + idCell,
+      id: stableImportId(sheetKey, idCell),
       name,
       category: '',
       colors: attrs.colors.length ? attrs.colors : ['n/a'],
